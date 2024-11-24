@@ -2,7 +2,6 @@ package pickify.pickifybackend.contoller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,7 +16,7 @@ public class PickyPhotoController {
 
     @PostMapping("/picky/extract")
     public ResponseEntity<PickyPhotoResponse> getAIResult(@RequestBody PickyPhotoRequest pickyPhotoRequest) {
-        PickyPhotoResponse result = pickyPhotoService.getAIResult();
+        PickyPhotoResponse result = pickyPhotoService.getAIResult(pickyPhotoRequest);
         return ResponseEntity.ok(result);
     }
 }
