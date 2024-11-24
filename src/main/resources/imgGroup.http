@@ -1,0 +1,10 @@
+POST http://localhost:8080/api/categories/match
+Content-Type: application/json
+
+{
+  "keywords": [
+    "cat food",
+    "bird cage",
+    "macbook"
+  ]
+}
