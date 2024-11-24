@@ -37,6 +37,10 @@ dependencies {
     implementation 'dev.langchain4j:langchain4j-vertex-ai:0.31.0'
     implementation 'dev.langchain4j:langchain4j-vertex-ai-gemini:0.31.0'
     implementation 'dev.langchain4j:langchain4j-document-parser-apache-pdfbox:0.31.0'
+
+    // mongodb
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
 }
 
 tasks.named('test') {
