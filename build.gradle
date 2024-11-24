@@ -29,6 +29,14 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // GCP - Vertex AI
+    implementation platform('com.google.cloud:libraries-bom:26.50.0')
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.0'
+    implementation 'dev.langchain4j:langchain4j:0.31.0'
+    implementation 'dev.langchain4j:langchain4j-vertex-ai:0.31.0'
+    implementation 'dev.langchain4j:langchain4j-vertex-ai-gemini:0.31.0'
+    implementation 'dev.langchain4j:langchain4j-document-parser-apache-pdfbox:0.31.0'
 }
 
 tasks.named('test') {
