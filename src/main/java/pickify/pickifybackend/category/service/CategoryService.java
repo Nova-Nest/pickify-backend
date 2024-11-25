@@ -1,54 +1,73 @@
 package pickify.pickifybackend.category.service;
 
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
-import pickify.pickifybackend.category.TaxonomyLoader;
+import pickify.pickifybackend.category.CategoryLoader;
 import pickify.pickifybackend.category.controller.CategoryRequestDto;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class CategoryService {
 
-    public String findCategory(CategoryRequestDto request) {
-        List<String> keywords = request.getKeywords();
-        String matchedCategory = "Uncategorized"; // 초기값 설정: 매칭되지 않은 경우
+    private static final String CATEGORY_FILE_PATH = "src/main/resources/static/taxonomy.en-US.txt";
 
-        // 텍스트 파일에서 카테고리를 읽어 트리 형태로 저장
-        var categoryTree = TaxonomyLoader.loadCategories("src/main/resources/taxonomy.en-US.txt");
+    private final Map<String, Set<String>> categoryTree = new HashMap<>();
+    private final Map<String, String> parentMap = new HashMap<>();
+    private final Map<String, Integer> keywordWeights = new HashMap<>();
 
-        // 자식 -> 부모 관계를 저장할 맵 생성
-        Map<String, String> parentMap = new HashMap<>();
-        for (Map.Entry<String, List<String>> entry : categoryTree.entrySet()) {
-            String parent = entry.getKey(); // 부모 카테고리
-            for (String child : entry.getValue()) {
-                parentMap.put(child, parent); // 자식 -> 부모 관계 저장
-            }
-        }
-
-        // 키워드 리스트에서 카테고리를 매칭
-        for (String keyword : keywords) {
-            for (String category : categoryTree.keySet()) {
-                // 키워드가 카테고리명에 포함되면 매칭
-                if (keyword.toLowerCase().contains(category.toLowerCase())) {
-                    matchedCategory = findTopLevelCategory(parentMap, category); // 최상위 부모 카테고리 반환
-                    break;
-                }
-            }
-            if (!matchedCategory.equals("Uncategorized")) break; // 매칭되면 종료
-        }
-
-
-        return matchedCategory;
+    // 카테고리 파일 로드
+    @PostConstruct
+    public void loadCategories() {
+        // CategoryLoader로 파일 로딩
+        CategoryLoader.loadCategories(CATEGORY_FILE_PATH, categoryTree, parentMap);
     }
 
-    // 최상위 부모 카테고리를 찾는 메서드
-    private String findTopLevelCategory(Map<String, String> parentMap, String category) {
-        while (parentMap.containsKey(category)) {
-            category = parentMap.get(category); // 부모 카테고리를 따라 올라감
+    // 키워드 기반 카테고리 매칭
+    public String matchCategory(CategoryRequestDto requestDto) {
+        Map<String, Integer> categoryScores = new HashMap<>();
+
+        for (String keyword : requestDto.getKeywords()) {
+            int weight = keywordWeights.getOrDefault(keyword.toLowerCase(), 1); // 기본 가중치 1
+            for (String category : categoryTree.keySet()) {
+                if (category.toLowerCase().contains(keyword.toLowerCase())) {
+                    categoryScores.put(category, categoryScores.getOrDefault(category, 0) + weight);
+                }
+            }
         }
-        return category; // 최상위 부모 반환
+        // 최상위 카테고리 계산
+        return calculateBestCategory(categoryScores);
+    }
+
+    // 최종적으로 가장 점수가 높은 카테고리 반환
+    private String calculateBestCategory(Map<String, Integer> categoryScores) {
+        String bestCategory = null;
+        int maxScore = 0;
+        Map<String, Integer> updatedScores = new HashMap<>();
+
+        for (Map.Entry<String, Integer> entry : categoryScores.entrySet()) {
+            String category = entry.getKey();
+            int score = entry.getValue();
+            while (parentMap.containsKey(category)) {
+                category = parentMap.get(category); // 상위 카테고리로 점수 합산
+            }
+
+            updatedScores.put(category, updatedScores.getOrDefault(category, 0) + score);
+            if (updatedScores.get(category) > maxScore) {
+                maxScore = updatedScores.get(category);
+                bestCategory = category;
+            }
+        }
+
+        categoryScores.putAll(updatedScores);
+        return bestCategory;
+    }
+
+    // 키워드 중요도 초기화
+    public void loadKeywordWeights(Map<String, Integer> weights) {
+        keywordWeights.putAll(weights);
     }
 }
