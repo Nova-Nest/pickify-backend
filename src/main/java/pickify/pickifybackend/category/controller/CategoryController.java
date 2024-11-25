@@ -14,7 +14,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping("/match")
-    public String matchCategory(@RequestBody CategoryRequestDto request) {
+    public CategoryResponseDto matchCategory(@RequestBody CategoryRequestDto request) {
         return categoryService.matchCategory(request);
     }
 }
