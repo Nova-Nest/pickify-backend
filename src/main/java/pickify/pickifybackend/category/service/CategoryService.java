@@ -12,8 +12,6 @@ import java.util.Map;
 @Service
 public class CategoryService {
 
-
-
     public String findCategory(CategoryRequestDto request) {
         List<String> keywords = request.getKeywords();
         String matchedCategory = "Uncategorized"; // 초기값 설정: 매칭되지 않은 경우
