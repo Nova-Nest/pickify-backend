@@ -1,97 +1,73 @@
 package pickify.pickifybackend.category.service;
 
-import ai.djl.Model;
 import ai.djl.ModelException;
-import ai.djl.inference.Predictor;
 import ai.djl.translate.TranslateException;
-import ai.djl.translate.Translator;
-import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pickify.pickifybackend.category.CategoryLoader;
-import pickify.pickifybackend.category.SentenceBERTTranslator;
-import pickify.pickifybackend.category.controller.CategoryRequestDto;
+import pickify.pickifybackend.category.BertTranslator;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class VectorCategoryService {
+    // BertTranslator 인스턴스
+    private final BertTranslator bertTranslator;
 
-    private final Map<String, String> parentMap = new HashMap<>();
-    private final Map<String, Set<String>> categoryTree = new HashMap<>();
-    private final Map<String, double[]> categoryVectors = new HashMap<>();
-    private static final String CATEGORY_FILE_PATH = "src/main/resources/static/taxonomy.en-US.txt";
+    // 카테고리 임베딩을 저장할 맵
+    private final Map<String, float[]> categoryEmbeddings = new HashMap<>();
 
-    private Predictor<String, double[]> embeddingPredictor;
-
-    @PostConstruct
-    public void init() throws IOException, ModelException {
-        loadCategories();
-        loadModel();
-        generateCategoryEmbeddings();
+    // 생성자
+    public VectorCategoryService() throws IOException, ModelException, TranslateException {
+        this.bertTranslator = new BertTranslator();
+        loadCategoryEmbeddings("src/main/resources/static/taxonomy.en-US.txt");
     }
 
-    // Taxonomy 로드
-    private void loadCategories() {
-        CategoryLoader.loadCategories(CATEGORY_FILE_PATH, categoryTree, parentMap);
-    }
-
-    // Sentence-BERT 모델 로드
-    private void loadModel() throws ModelException, IOException {
-        Model model = Model.newInstance("sentence-transformers/all-MiniLM-L6-v2");
-        Translator<String, double[]> translator = new SentenceBERTTranslator();
-        embeddingPredictor = model.newPredictor(translator);
-    }
-
-    // 카테고리 임베딩 생성
-    private void generateCategoryEmbeddings() {
-        for (String category : categoryTree.keySet()) {
-            try {
-                double[] embedding = embeddingPredictor.predict(category);
-                categoryVectors.put(category, embedding);
-            } catch (TranslateException e) {
-                e.printStackTrace();
+    // 카테고리 임베딩을 로드하는 메서드
+    private void loadCategoryEmbeddings(String filePath) throws IOException, TranslateException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String category = line.split(" > ")[0];
+                categoryEmbeddings.put(category, bertTranslator.embedText(category));
             }
         }
     }
 
-    // 키워드 기반 카테고리 매칭
-    public String matchCategory(CategoryRequestDto requestDto) {
-        try {
-            double[] keywordEmbedding = embeddingPredictor.predict(String.join(" ", requestDto.getKeywords()));
+    // 키워드로 카테고리를 매칭하는 메서드
+    public String matchCategory(String keyword) {
+        float[] keywordEmbedding = bertTranslator.embedText(keyword);
 
-            String bestCategory = "Uncategorized";
-            double maxSimilarity = 0;
+        String bestMatch = null;
+        double bestSimilarity = -1;
 
-            for (Map.Entry<String, double[]> entry : categoryVectors.entrySet()) {
-                double similarity = calculateCosineSimilarity(keywordEmbedding, entry.getValue());
-                if (similarity > maxSimilarity) {
-                    maxSimilarity = similarity;
-                    bestCategory = entry.getKey();
-                }
+        for (Map.Entry<String, float[]> entry : categoryEmbeddings.entrySet()) {
+            double similarity = cosineSimilarity(keywordEmbedding, entry.getValue());
+            if (similarity > bestSimilarity) {
+                bestSimilarity = similarity;
+                bestMatch = entry.getKey();
             }
-
-            return bestCategory;
-        } catch (TranslateException e) {
-            e.printStackTrace();
-            return "Error";
         }
+
+        return bestMatch;
     }
 
-    // 코사인 유사도 계산
-    private double calculateCosineSimilarity(double[] vector1, double[] vector2) {
+    // 코사인 유사도를 계산하는 메서드
+    private double cosineSimilarity(float[] vectorA, float[] vectorB) {
         double dotProduct = 0.0;
-        double norm1 = 0.0;
-        double norm2 = 0.0;
+        double normA = 0.0;
+        double normB = 0.0;
 
-        for (int i = 0; i < vector1.length; i++) {
-            dotProduct += vector1[i] * vector2[i];
-            norm1 += Math.pow(vector1[i], 2);
-            norm2 += Math.pow(vector2[i], 2);
+        for (int i = 0; i < vectorA.length; i++) {
+            dotProduct += vectorA[i] * vectorB[i];
+            normA += Math.pow(vectorA[i], 2);
+            normB += Math.pow(vectorB[i], 2);
         }
 
-        return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
+        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
     }
 }
