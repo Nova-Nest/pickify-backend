@@ -7,29 +7,19 @@ import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 import pickify.pickifybackend.dto.PickyPhotoKeywordResponse;
 import pickify.pickifybackend.dto.PickyPhotoRequest;
 import pickify.pickifybackend.dto.PickyPhotoResponse;
 import pickify.pickifybackend.dto.TestResponse;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
