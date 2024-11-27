@@ -2,5 +2,5 @@ POST http://localhost:8080/api/categories/test/vector/match
 Content-Type: application/json
 
 {
-    "keyword": "APPLE"
+  "keywords": ["macbook", "laptop", "apple"]
 }

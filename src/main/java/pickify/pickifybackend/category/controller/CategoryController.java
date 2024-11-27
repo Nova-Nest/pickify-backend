@@ -1,5 +1,6 @@
 package pickify.pickifybackend.category.controller;
 
+import ai.djl.util.Pair;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -7,6 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pickify.pickifybackend.category.service.CategoryService;
 import pickify.pickifybackend.category.service.VectorCategoryService;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,7 +25,7 @@ public class CategoryController {
     }
 
     @PostMapping("/vector/match")
-    public String matchVectorCategory(@RequestBody String keyword) {
-        return vectorCategoryService.matchCategory(keyword);
+    public Map<String, Pair<String, Double>> matchVectorCategory(@RequestBody CategoryRequestDto request) {
+        return vectorCategoryService.findMostSimilarCategory(request.getKeywords());
     }
 }
