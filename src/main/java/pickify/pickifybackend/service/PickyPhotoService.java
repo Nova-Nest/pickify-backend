@@ -7,17 +7,19 @@ import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import pickify.pickifybackend.dto.PickyPhotoKeywordResponse;
 import pickify.pickifybackend.dto.PickyPhotoRequest;
 import pickify.pickifybackend.dto.PickyPhotoResponse;
+import pickify.pickifybackend.dto.TestResponse;
+
+import java.net.URI;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -48,10 +50,21 @@ public class PickyPhotoService {
 
         // 1. 키워드 추출; 1. Extract keyword
         PickyPhotoKeywordResponse pickyPhotoKeywordResponse;
+
+        TestResponse testResponse;
+        UserMessage result = PromptManager.extractAndGenerateQueries(pickyPhotoRequest.photoUrl(), pickyPhotoRequest.langType());
+        Response<AiMessage> reulstResponse = model.generate(result);
+
+        log.info("Received JSON: {}", reulstResponse.content().text());
+
         try {
             pickyPhotoKeywordResponse = objectMapper.readValue(keywordResponse.content().text(), PickyPhotoKeywordResponse.class);
+
+            testResponse = objectMapper.readValue(reulstResponse.content().text(), TestResponse.class);
+
             log.info("keywordResponse: {}", keywordResponse);
             log.info("PickyPhotoKeywordResponse: {}", pickyPhotoKeywordResponse);
+            log.info("testResponse: {}", testResponse);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -60,9 +73,56 @@ public class PickyPhotoService {
         UserMessage pictureUrl = PromptManager.extractImagesWithKeywords(pickyPhotoRequest.photoUrl(), pickyPhotoKeywordResponse.keywords());
         Response<AiMessage> pictureUrlResponse = model.generate(pictureUrl);
 
+        testResponse.queries().forEach(this::searchImage);
+
         log.info("pictureUrlResponse : {}", pictureUrlResponse);
 
         return new PickyPhotoResponse();
+    }
+
+    private String searchImage(String query) {
+        final String API_KEY = "AIzaSyDQew5mwXtQTRNhEK5ReV3-4czOmeXpZmA"; // Google API 키
+        final String SEARCH_ENGINE_ID = "00134324649bb4388"; // 검색 엔진 ID
+        final String API_URL = "https://www.googleapis.com/customsearch/v1"; // 기본 제공 URI
+        RestTemplate restTemplate = new RestTemplate();
+
+        String urlString = String.format(
+                "%s?q=%s&searchType=image&key=%s&cx=%s",
+                API_URL, query.replace(" ", "+"), API_KEY, SEARCH_ENGINE_ID
+        );
+
+        URI uri = URI.create(urlString);
+
+        String response = restTemplate.getForEntity(uri, String.class).getBody();
+
+        log.info("response: {}", response);
+
+        return response;
+//        try {
+//            URL url = new URL(urlString);
+//            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+//            httpURLConnection.setRequestMethod("GET");
+//            httpURLConnection.setRequestProperty("Accept", "application/json");
+//
+//            // 응답 받기
+//            int responseCode = httpURLConnection.getResponseCode();
+//            if (responseCode != 200) {
+//                throw new RuntimeException("HTTP GET Request Failed with Error Code: " + responseCode);
+//            }
+//
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+//            StringBuilder response = new StringBuilder();
+//            String line;
+//
+//            while ((line = reader.readLine()) != null) {
+//                response.append(line);
+//            }
+//            reader.close();
+//
+//            return response.toString(); // JSON 응답 반환
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     private UserMessage extractKeywordFromPhoto(String photoUrl, String langType) {
