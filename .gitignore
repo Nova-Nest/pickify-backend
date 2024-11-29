@@ -39,4 +39,4 @@ out/
 etc/
 .env
 
-.json
+*.json
