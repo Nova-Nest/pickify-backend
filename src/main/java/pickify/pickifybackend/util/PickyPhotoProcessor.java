@@ -1,4 +1,4 @@
-package pickify.pickifybackend.service;
+package pickify.pickifybackend.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import pickify.pickifybackend.dto.SearchResultResponse;
 
-import javax.management.Query;
 import java.net.URI;
 import java.util.List;
 
@@ -20,6 +19,10 @@ public class PickyPhotoProcessor {
     private String SEARCH_ID;
     @Value("${gcp.api-key}")
     private String SEARCH_API_KEY;
+
+    public List<SearchResultResponse> searchImageBy(List<String> queries) {
+        return queries.stream().map(this::getSearchResponse).toList();
+    }
 
     public SearchResultResponse searchImageBy(String query) {
         return getSearchResponse(query);
@@ -56,7 +59,7 @@ public class PickyPhotoProcessor {
 
             String imageUrl = first.path("link").asText();
             String imageTitle = first.path("title").asText();
-            String contextLink = first.path("link").path("contextLink").asText();
+            String contextLink = first.path("image").path("contextLink").asText();
 
             return new SearchResultResponse(imageUrl, imageTitle, contextLink);
         } else {

@@ -6,6 +6,6 @@ public record PickyPhotoRequest(
         String imageUrl,
         String name,
         List<String> keywords,
-        String langType
+        String userUuid
 ) {
 }
