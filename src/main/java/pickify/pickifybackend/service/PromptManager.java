@@ -18,6 +18,7 @@ public class PromptManager {
                         2. Provide at least five results.
                         3. Results should be relevant to the `name` and keywords and must follow a structured format.
                         4. Output should be in a JSON-like list format.
+                        5. Never include backticks in JSON. Don't do. like ```json```
 
                         **Input Examples:**
                         name: coffee

@@ -1,4 +1,4 @@
-package pickify.pickifybackend.domain;
+package pickify.pickifybackend.entity;
 
 import lombok.Builder;
 import org.springframework.data.annotation.Id;
