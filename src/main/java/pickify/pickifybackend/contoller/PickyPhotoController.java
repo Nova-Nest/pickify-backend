@@ -12,6 +12,8 @@ import pickify.pickifybackend.dto.PickyRelatedProductResponse;
 import pickify.pickifybackend.dto.SearchResultResponse;
 import pickify.pickifybackend.service.PickyLLMService;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 public class PickyPhotoController {
@@ -24,19 +26,14 @@ public class PickyPhotoController {
     }
 
     @GetMapping("/picky/relateProduct")
-    public ResponseEntity<PickyRelatedProductResponse> getRelatedProduct(String productId) {
-        PickyRelatedProductResponse result = pickyLLMService.getRelatedProduct(productId);
+    public ResponseEntity<PickyRelatedProductResponse> getRelatedProduct(String id) {
+        PickyRelatedProductResponse result = pickyLLMService.getRelatedProduct(id);
         return ResponseEntity.ok(result);
     }
 
-//    @GetMapping("/picky/picky-suggestion")
-//    public ResponseEntity<List<>> getSuggestion(String keywords) {
-//
-//    }
-
-//    @PostMapping("/picky/search")
-//    public ResponseEntity<SearchResultResponse> getSearchResult(String keywords) {
-//        SearchResultResponse result = pickyLLMService.getImageSearchResult(keywords);
-//        return ResponseEntity.ok(result);
-//    }
+    @GetMapping("/picky/picky-suggestion")
+    public ResponseEntity<List<SearchResultResponse>> getSuggestion(String keywords, String productId) {
+        List<SearchResultResponse> result = pickyLLMService.getSuggestion(keywords, productId);
+        return ResponseEntity.ok(result);
+    }
 }
