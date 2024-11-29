@@ -25,9 +25,7 @@ import pickify.pickifybackend.util.PickyPhotoProcessor;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
@@ -88,7 +86,18 @@ public class PickyLLMService {
         String userUuid = userLog.getUserUuid();
 
         List<UserLog> relatedCategoryLogs = userLogRepository.findAllByCategoryAndUserUuidOrderByCreatedAtDesc(resultCategory, userUuid);
-        List<PickyRelatedProductResponse.Data> data = relatedCategoryLogs.stream()
+
+        Set<String> seenKeywords = new HashSet<>();
+        List<UserLog> uniqueLogs = new ArrayList<>();
+
+        for (UserLog log : relatedCategoryLogs) {
+            String key = log.getMainKeyword() + ":" + String.join(",", log.getBuiltInAiKeywords());
+            if (seenKeywords.add(key)) {
+                uniqueLogs.add(log);
+            }
+        }
+
+        List<PickyRelatedProductResponse.Data> data = uniqueLogs.stream()
                 .map(log -> new PickyRelatedProductResponse.Data(log.getOriginalImageUrl(), log.getMainKeyword(), log.getBuiltInAiKeywords()))
                 .toList();
 
