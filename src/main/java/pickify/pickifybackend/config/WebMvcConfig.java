@@ -24,7 +24,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000", "chrome-extension://joefpbhghckcofhmbofcopcclpgndaif", "chrome-extension://adbeiiapbemgdpeobhmdhaemefpnafme")
+                .allowedOrigins(
+                        "http://localhost:3000",
+                        "chrome-extension://joefpbhghckcofhmbofcopcclpgndaif",
+                        "chrome-extension://adbeiiapbemgdpeobhmdhaemefpnafme",
+                        "chrome-extension://nfglnoigklliplnmljoaolgepocmomn"
+                )
                 // GET, POST, PATCH, DELETE, OPTIONS 메서드 허용
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
