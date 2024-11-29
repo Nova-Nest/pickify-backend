@@ -12,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import pickify.pickifybackend.domain.UserLog;
 import pickify.pickifybackend.dto.*;
+import pickify.pickifybackend.repository.UserLogRepository;
 import pickify.pickifybackend.util.PickyPhotoProcessor;
 
 import java.util.ArrayList;
@@ -24,13 +26,12 @@ import java.util.List;
 public class PickyLLMService {
     @Value("${gcp.vertex.projectId}")
     private String PROJECT_ID;
-
     @Value("${gcp.vertex.location}")
     private String LOCATION;
-
     private final String MODEL_NAME = "gemini-1.5-flash-001";
 
     private final PickyPhotoProcessor pickyPhotoProcessor;
+    private final UserLogRepository userLogRepository;
 
     public SearchResultResponse getImageSearchResult(String searchText) {
         pickyPhotoProcessor.searchImageBy(searchText);
@@ -61,6 +62,7 @@ public class PickyLLMService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+
         return pickyPhotoProcessor.searchImageBy(results);
     }
 }
