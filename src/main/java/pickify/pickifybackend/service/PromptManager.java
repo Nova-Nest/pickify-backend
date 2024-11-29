@@ -111,6 +111,34 @@ public class PromptManager {
         );
     }
 
+    public static UserMessage extractSuggestionWith(String originalKeyword, List<String> keywords) {
+        return UserMessage.from(
+                TextContent.from(String.format("""
+                        You should suggest %s products based on %s.
+                        The products should be coordinated with %s.
+                        The Result must be a json format.
+                        Give the product in order.
+                         
+                        Json Format never include MD grammars Just pure JSON Format:
+                                            
+                        **Output Example:**
+                        [
+                            "Starbucks latte pairing ideas",
+                            "Top cafes for green tea lovers",
+                            "How to bake bread for coffee mornings",
+                            "Donut and coffee recipe ideas",
+                            "Popular coffee shop vibes"
+                        ]
+
+                        **Input:**
+                        originalKeyword: %s
+                        keywords: %s
+
+                        **Output:** (provide JSON-like list format as shown above)
+                        """, keywords.size(), keywords, originalKeyword, originalKeyword, keywords))
+        );
+    }
+
     // AI에게 카테고리를 기반으로 가장 관련 있는 카테고리를 찾도록 요청하는 메서드
     public static UserMessage extractCategoryFromKeywords(List<String> keywords, List<String> categoryList) {
         String categories = String.join(",", categoryList);

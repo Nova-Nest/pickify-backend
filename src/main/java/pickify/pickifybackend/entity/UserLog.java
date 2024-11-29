@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -21,7 +22,8 @@ public class UserLog {
     private List<String> resultImageUrls;
 
     @Builder
-    private UserLog(String userUuid, String mainKeyword, List<String> builtInAiKeywords, List<String> geminiReturnKeywords, String category, String originalImageUrl, List<String> resultImageUrls) {
+    private UserLog(String userUuid, String mainKeyword, List<String> builtInAiKeywords, List<String> geminiReturnKeywords,
+                    String category, String originalImageUrl, List<String> resultImageUrls) {
         this.userUuid = userUuid;
         this.mainKeyword = mainKeyword;
         this.builtInAiKeywords = builtInAiKeywords;

@@ -3,6 +3,7 @@ package pickify.pickifybackend.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.gax.rpc.DataLossException;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -15,6 +16,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import pickify.pickifybackend.dto.PickyPhotoRequest;
 import pickify.pickifybackend.dto.PickyPhotoResponse;
+import pickify.pickifybackend.dto.PickyRelatedProductResponse;
 import pickify.pickifybackend.dto.SearchResultResponse;
 import pickify.pickifybackend.entity.UserLog;
 import pickify.pickifybackend.repository.UserLogRepository;
@@ -24,11 +26,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -44,17 +48,10 @@ public class PickyLLMService {
     @Value("${category.file.path}")
     private String CATEGORY_FILE_PATH;
 
-
     private final PickyPhotoProcessor pickyPhotoProcessor;
     private final UserLogRepository userLogRepository;
 
     private static List<String> categoryList = new ArrayList<>(); //파일에서 읽은 카테고리들을 저장
-
-
-    public SearchResultResponse getImageSearchResult(String searchText) {
-        pickyPhotoProcessor.searchImageBy(searchText);
-        return null;
-    }
 
     public PickyPhotoResponse getAIResult(PickyPhotoRequest pickyPhotoRequest) {
         ChatLanguageModel model = VertexAiGeminiChatModel.builder()
@@ -81,6 +78,38 @@ public class PickyLLMService {
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public PickyRelatedProductResponse getRelatedProduct(String id) {
+        UserLog userLog = userLogRepository.findById(id)
+                .orElseThrow(() -> new NullPointerException("A datum does not exist : This is null"));
+
+        String resultCategory = userLog.getCategory();
+        String userUuid = userLog.getUserUuid();
+
+        List<UserLog> relatedCategoryLogs = userLogRepository.findAllByCategoryAndUserUuid(resultCategory, userUuid);
+        List<PickyRelatedProductResponse.Data> data = relatedCategoryLogs.stream()
+                .map(log -> new PickyRelatedProductResponse.Data(log.getOriginalImageUrl(), log.getMainKeyword(), log.getBuiltInAiKeywords()))
+                .toList();
+
+        return new PickyRelatedProductResponse(userLog.getCategory(), data);
+    }
+
+
+    public List<SearchResultResponse> getSuggestion(String keywords, String productId) {
+        ChatLanguageModel model = VertexAiGeminiChatModel.builder()
+                .project(PROJECT_ID)
+                .location(LOCATION)
+                .modelName(MODEL_NAME)
+                .build();
+
+        UserLog userLog = userLogRepository.findById(productId)
+                .orElseThrow(() -> new NullPointerException("A datum does not exist : This is null"));
+
+        List<String> keywordList = Arrays.asList(keywords.split(","));
+        List<String> extractQuery = extractSuggestionWith(userLog.getMainKeyword(), keywordList, model);
+
+        return pickyPhotoProcessor.searchImageBy(extractQuery);
     }
 
     private List<String> extractDataResult(PickyPhotoRequest pickyPhotoRequest, ChatLanguageModel model) {
@@ -110,8 +139,29 @@ public class PickyLLMService {
         UserMessage category = PromptManager.extractCategoryFromKeywords(keywords, categoryList);
         Response<AiMessage> resultResponse = model.generate(category);
 
-        log.info("Received JSON: {}", resultResponse.content().text());
         return extractCategoryFromJson(resultResponse.content().text());
+    }
+
+    private List<String> extractSuggestionWith(String originalKeyword, List<String> keywords, ChatLanguageModel model) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        UserMessage searchCandidates = PromptManager.extractSuggestionWith(originalKeyword, keywords);
+        Response<AiMessage> resultResponse = model.generate(searchCandidates);
+
+        List<String> results = new ArrayList<>();
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(resultResponse.content().text());
+            if (jsonNode.isArray()) {
+                for (JsonNode json : jsonNode) {
+                    results.add(json.asText());
+                }
+            }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        return results;
     }
 
     private UserLog getUserLog(PickyPhotoRequest pickyPhotoRequest, String category, List<String> results, List<SearchResultResponse> searchResultResponseList) {
