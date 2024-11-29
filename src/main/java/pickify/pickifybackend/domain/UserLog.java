@@ -1,11 +1,13 @@
 package pickify.pickifybackend.domain;
 
 import lombok.Builder;
+import lombok.Getter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
+@Getter
 @Document(collection = "userLog")
 public class UserLog {
     @Id
@@ -15,13 +17,17 @@ public class UserLog {
     private List<String> builtInAiKeywords; //나영님이 주시는 Keywords
     private List<String> geminiReturnKeywords; //후가공 keywords
     private String category;
+    private String originalImageUrl;
+    private List<String> resultImageUrls;
 
     @Builder
-    private UserLog(String userUuid, String mainKeyword, List<String> builtInAiKeywords, List<String> geminiReturnKeywords, String category) {
+    private UserLog(String userUuid, String mainKeyword, List<String> builtInAiKeywords, List<String> geminiReturnKeywords, String category, String originalImageUrl, List<String> resultImageUrls) {
         this.userUuid = userUuid;
         this.mainKeyword = mainKeyword;
         this.builtInAiKeywords = builtInAiKeywords;
         this.geminiReturnKeywords = geminiReturnKeywords;
         this.category = category;
+        this.originalImageUrl = originalImageUrl;
+        this.resultImageUrls = resultImageUrls;
     }
 }

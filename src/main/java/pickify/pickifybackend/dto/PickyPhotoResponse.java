@@ -1,4 +1,9 @@
 package pickify.pickifybackend.dto;
 
-public record PickyPhotoResponse() {
+import java.util.List;
+
+public record PickyPhotoResponse(
+        String id,
+        List<SearchResultResponse> data
+) {
 }

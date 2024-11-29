@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pickify.pickifybackend.domain.UserLog;
 import pickify.pickifybackend.dto.PickyPhotoRequest;
+import pickify.pickifybackend.dto.PickyPhotoResponse;
 import pickify.pickifybackend.dto.SearchResultResponse;
 import pickify.pickifybackend.service.ImgCategoryService;
 import pickify.pickifybackend.service.PickyLLMService;
@@ -22,7 +23,7 @@ public class PickyPhotoController {
     private final UserLongService userLongService;
 
     @PostMapping("/picky/extract")
-    public ResponseEntity<List<SearchResultResponse>> getAIResult(@RequestBody PickyPhotoRequest pickyPhotoRequest) {
+    public ResponseEntity<PickyPhotoResponse> getAIResult(@RequestBody PickyPhotoRequest pickyPhotoRequest) {
         String category = imgCategoryService.getAIResult(pickyPhotoRequest.keywords());
         UserLog userLog= UserLog.builder()
                 .userUuid(pickyPhotoRequest.userUuid())
@@ -32,7 +33,7 @@ public class PickyPhotoController {
                 .build();
         userLongService.saveUserLog(userLog);
 
-        List<SearchResultResponse> result = pickyLLMService.getAIResult(pickyPhotoRequest);
+        PickyPhotoResponse result = pickyLLMService.getAIResult(pickyPhotoRequest);
 
         return ResponseEntity.ok(result);
     }
