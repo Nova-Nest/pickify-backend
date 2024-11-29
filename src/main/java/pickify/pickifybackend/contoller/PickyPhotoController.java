@@ -10,8 +10,6 @@ import pickify.pickifybackend.dto.PickyPhotoResponse;
 import pickify.pickifybackend.dto.SearchResultResponse;
 import pickify.pickifybackend.service.PickyLLMService;
 
-import java.util.List;
-
 @RequiredArgsConstructor
 @RestController
 public class PickyPhotoController {

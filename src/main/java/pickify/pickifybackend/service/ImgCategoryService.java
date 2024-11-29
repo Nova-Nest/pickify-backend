@@ -1,7 +1,5 @@
 package pickify.pickifybackend.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -12,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import pickify.pickifybackend.category.controller.CategoryRequestDto;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -38,7 +35,7 @@ public class ImgCategoryService {
     private static final String CATEGORY_FILE_PATH = "src/main/resources/static/taxonomy.en-US.txt";
     static List<String> categoryList = new ArrayList<>(); //파일에서 읽은 카테고리들을 저장
 
-    public String getAIResult(CategoryRequestDto requestDto) {
+    public String getAIResult(List<String> keywords) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         ChatLanguageModel model = VertexAiGeminiChatModel.builder()
@@ -50,7 +47,7 @@ public class ImgCategoryService {
         // 카테고리 파일을 로드합니다.
         loadCategoriesFromFile(CATEGORY_FILE_PATH);
 
-        UserMessage category = PromptManager.extractCategoryFromKeywords(requestDto.getKeywords(), categoryList);
+        UserMessage category = PromptManager.extractCategoryFromKeywords(keywords, categoryList);
 
         Response<AiMessage> resultResponse = model.generate(category);
 
@@ -59,7 +56,7 @@ public class ImgCategoryService {
         return extractCategoryFromJson(resultResponse.content().text());
 
     }
-    public String extractCategoryFromJson(String jsonResponse) {
+    private String extractCategoryFromJson(String jsonResponse) {
         Pattern pattern = Pattern.compile("\"category\"\\s*:\\s*\"([^\"]+)\"");
         Matcher matcher = pattern.matcher(jsonResponse);
         if (matcher.find()) {
@@ -69,7 +66,7 @@ public class ImgCategoryService {
     }
 
     // 서버가 시작될 때 파일을 읽어 메모리에 저장하는 메서드
-    public void loadCategoriesFromFile(String filePath) {
+    private void loadCategoriesFromFile(String filePath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
