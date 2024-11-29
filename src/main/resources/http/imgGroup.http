@@ -1,4 +1,18 @@
-POST http://localhost:8080/api/categories/test/match
+POST http://localhost:8080/api/img-category
+Content-Type: application/json
+
+{
+  "keywords": [
+    "bag",
+    "leather",
+    "tote",
+    "shoulder",
+    "handbag"
+  ]
+}
+
+###
+POST http://localhost:8080/api/img-category
 Content-Type: application/json
 
 {
@@ -8,69 +22,8 @@ Content-Type: application/json
       "laptop",
       "computer",
       "rose gold",
-      "keyboard",
-      "trackpad",
-      "screen",
-      "display",
-      "mac",
-      "apple logo",
-      "metal",
-      "aluminum",
-      "thin",
-      "lightweight",
-      "portable",
-      "powerful",
-      "fast",
-      "reliable",
-      "stylish",
-      "elegant",
-      "modern",
-      "technology",
-      "digital",
-      "device",
-      "gadget",
-      "electronics",
-      "notebook",
-      "work",
-      "business",
-      "productivity",
-      "creativity",
-      "entertainment",
-      "gaming",
-      "education",
-      "student",
-      "professional",
-      "designer",
-      "developer",
-      "writer",
-      "artist",
-      "musician",
-      "photographer",
-      "videographer",
-      "editor",
-      "programmer",
-      "entrepreneur",
-      "businessman",
-      "businesswoman",
-      "student",
-      "teacher",
-      "student",
-      "professor",
-      "researcher",
-      "scientist",
-      "engineer",
-      "doctor",
-      "lawyer",
-      "accountant",
-      "designer",
-      "artist",
-      "musician",
-      "photographer",
-      "videographer",
-      "editor",
-      "programmer",
-      "entrepreneur",
-      "businessman",
-      "businesswoman"
+      "keyboard"
   ]
 }
+
+
