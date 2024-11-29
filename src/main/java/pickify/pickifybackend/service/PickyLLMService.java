@@ -12,10 +12,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import pickify.pickifybackend.domain.UserLog;
 import pickify.pickifybackend.dto.PickyPhotoRequest;
 import pickify.pickifybackend.dto.PickyPhotoResponse;
 import pickify.pickifybackend.dto.SearchResultResponse;
+import pickify.pickifybackend.entity.UserLog;
 import pickify.pickifybackend.repository.UserLogRepository;
 import pickify.pickifybackend.util.PickyPhotoProcessor;
 
@@ -63,17 +63,7 @@ public class PickyLLMService {
 
         List<SearchResultResponse> searchResultResponseList = pickyPhotoProcessor.searchImageBy(results);
 
-        UserLog userLog = UserLog.builder()
-                .userUuid(pickyPhotoRequest.userUuid())
-                .mainKeyword(pickyPhotoRequest.name())
-                .builtInAiKeywords(pickyPhotoRequest.keywords())
-                .category(category)
-                .geminiReturnKeywords(results)
-                .originalImageUrl(pickyPhotoRequest.imageUrl())
-                .resultImageUrls(searchResultResponseList.stream().map(SearchResultResponse::imageUrl).toList())
-                .build();
-
-        UserLog savedUserlog = userLogRepository.save(userLog);
+        UserLog savedUserlog = getUserLog(pickyPhotoRequest, category, results, searchResultResponseList);
         return new PickyPhotoResponse(savedUserlog.getId(), searchResultResponseList);
     }
 
@@ -106,6 +96,20 @@ public class PickyLLMService {
 
         log.info("Received JSON: {}", resultResponse.content().text());
         return extractCategoryFromJson(resultResponse.content().text());
+    }
+
+    private UserLog getUserLog(PickyPhotoRequest pickyPhotoRequest, String category, List<String> results, List<SearchResultResponse> searchResultResponseList) {
+        UserLog userLog = UserLog.builder()
+                .userUuid(pickyPhotoRequest.userUuid())
+                .mainKeyword(pickyPhotoRequest.name())
+                .builtInAiKeywords(pickyPhotoRequest.keywords())
+                .category(category)
+                .geminiReturnKeywords(results)
+                .originalImageUrl(pickyPhotoRequest.imageUrl())
+                .resultImageUrls(searchResultResponseList.stream().map(SearchResultResponse::imageUrl).toList())
+                .build();
+
+        return userLogRepository.save(userLog);
     }
 
     private String extractCategoryFromJson(String jsonResponse) {
