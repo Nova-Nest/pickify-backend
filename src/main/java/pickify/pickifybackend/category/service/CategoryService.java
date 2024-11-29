@@ -2,6 +2,7 @@ package pickify.pickifybackend.category.service;
 
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pickify.pickifybackend.category.CategoryLoader;
 import pickify.pickifybackend.category.controller.CategoryRequestDto;
@@ -14,7 +15,8 @@ import java.util.Set;
 @Service
 public class CategoryService {
 
-    private static final String CATEGORY_FILE_PATH = "src/main/resources/static/taxonomy.en-US.txt";
+    @Value("${category.file.path}")
+    private String CATEGORY_FILE_PATH;
 
     private final Map<String, Set<String>> categoryTree = new HashMap<>(); //각 카테고리와 해당 카테고리에 속하는 키워드 집합을 저장합니다.
     private final Map<String, String> parentMap = new HashMap<>(); //parentMap 참조하여 상위 카테고리를 찾음

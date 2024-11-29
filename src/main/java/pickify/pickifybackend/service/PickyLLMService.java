@@ -12,6 +12,7 @@ import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import pickify.pickifybackend.dto.PickyPhotoRequest;
 import pickify.pickifybackend.dto.PickyPhotoResponse;
@@ -22,8 +23,8 @@ import pickify.pickifybackend.repository.UserLogRepository;
 import pickify.pickifybackend.util.PickyPhotoProcessor;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +44,9 @@ public class PickyLLMService {
     private String LOCATION;
 
     private final String MODEL_NAME = "gemini-1.5-flash-001";
-    private final String CATEGORY_FILE_PATH = "src/main/resources/static/taxonomy.en-US.txt";
+
+    @Value("${category.file.path}")
+    private String CATEGORY_FILE_PATH;
 
     private final PickyPhotoProcessor pickyPhotoProcessor;
     private final UserLogRepository userLogRepository;
@@ -186,7 +189,9 @@ public class PickyLLMService {
 
     // 서버가 시작될 때 파일을 읽어 메모리에 저장하는 메서드
     private void loadCategoriesFromFile(String filePath) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        ClassPathResource resource = new ClassPathResource(filePath);
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 // Split the line by ">"
