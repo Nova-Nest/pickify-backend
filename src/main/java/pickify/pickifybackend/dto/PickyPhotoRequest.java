@@ -1,7 +1,11 @@
 package pickify.pickifybackend.dto;
 
+import java.util.List;
+
 public record PickyPhotoRequest(
-        String photoUrl,
-        String langType
+        String imageUrl,
+        String name,
+        List<String> keywords,
+        String userUuid
 ) {
 }
