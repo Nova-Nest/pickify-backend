@@ -3,6 +3,7 @@ package pickify.pickifybackend.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.gax.rpc.DataLossException;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pickify.pickifybackend.dto.PickyPhotoRequest;
 import pickify.pickifybackend.dto.PickyPhotoResponse;
+import pickify.pickifybackend.dto.PickyRelatedProductResponse;
 import pickify.pickifybackend.dto.SearchResultResponse;
 import pickify.pickifybackend.entity.UserLog;
 import pickify.pickifybackend.repository.UserLogRepository;
@@ -47,12 +49,6 @@ public class PickyLLMService {
 
     private static List<String> categoryList = new ArrayList<>(); //파일에서 읽은 카테고리들을 저장
 
-
-    public SearchResultResponse getImageSearchResult(String searchText) {
-        pickyPhotoProcessor.searchImageBy(searchText);
-        return null;
-    }
-
     public PickyPhotoResponse getAIResult(PickyPhotoRequest pickyPhotoRequest) {
         ChatLanguageModel model = VertexAiGeminiChatModel.builder()
                 .project(PROJECT_ID)
@@ -78,6 +74,21 @@ public class PickyLLMService {
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public PickyRelatedProductResponse getRelatedProduct(String productId) {
+        UserLog userLog = userLogRepository.findById(productId)
+                .orElseThrow(() -> new NullPointerException("A datum does not exist : This is null"));
+
+        String resultCategory = userLog.getCategory();
+        String userUuid = userLog.getUserUuid();
+
+        List<UserLog> relatedCategoryLogs = userLogRepository.findAllByCategoryAndUserUuid(resultCategory, userUuid);
+        List<PickyRelatedProductResponse.Data> data = relatedCategoryLogs.stream()
+                .map(log -> new PickyRelatedProductResponse.Data(log.getOriginalImageUrl(), log.getMainKeyword(), log.getBuiltInAiKeywords()))
+                .toList();
+
+        return new PickyRelatedProductResponse(userLog.getCategory(), data);
     }
 
     private List<String> extractDataResult(PickyPhotoRequest pickyPhotoRequest, ChatLanguageModel model) {
