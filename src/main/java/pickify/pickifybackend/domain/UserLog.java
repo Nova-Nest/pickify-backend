@@ -12,8 +12,8 @@ public class UserLog {
     private String id;
     private String userUuid;
     private String mainKeyword;
-    private List<String> builtInAiKeywords;
-    private List<String> geminiReturnKeywords;
+    private List<String> builtInAiKeywords; //나영님이 주시는 Keywords
+    private List<String> geminiReturnKeywords; //후가공 keywords
     private String category;
 
     @Builder
