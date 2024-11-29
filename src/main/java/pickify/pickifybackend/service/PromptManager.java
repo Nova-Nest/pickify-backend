@@ -114,28 +114,28 @@ public class PromptManager {
     public static UserMessage extractSuggestionWith(String originalKeyword, List<String> keywords) {
         return UserMessage.from(
                 TextContent.from(String.format("""
-                        You should suggest %s products based on %s.
-                        The products should be coordinated with %s.
-                        The Result must be a json format.
-                        Give the product in order.
-                         
-                        Json Format never include MD grammars Just pure JSON Format:
-                                            
-                        **Output Example:**
-                        [
-                            "Starbucks latte pairing ideas",
-                            "Top cafes for green tea lovers",
-                            "How to bake bread for coffee mornings",
-                            "Donut and coffee recipe ideas",
-                            "Popular coffee shop vibes"
-                        ]
+                    You are a famous fashionista.
+                    For the given `originalKeyword` and `keywords`, suggest product ideas.
+                    Each suggestion should match the `originalKeyword` with one of the `keywords` independently.
+                    The result must be a JSON array where each item corresponds to one keyword.
 
-                        **Input:**
-                        originalKeyword: %s
-                        keywords: %s
+                    Example Input:
+                    originalKeyword: "knit"
+                    keywords: ["jeans", "boots", "skirts"]
 
-                        **Output:** (provide JSON-like list format as shown above)
-                        """, keywords.size(), keywords, originalKeyword, originalKeyword, keywords))
+                    Example Output:
+                    [
+                        "Pair knit sweaters with jeans for a relaxed winter look",
+                        "Combine knit sweaters with boots for a cozy fall outfit",
+                        "Style knit cardigans with skirts for a chic spring vibe"
+                    ]
+
+                    **Input:**
+                    originalKeyword: %s
+                    keywords: %s
+
+                    **Output:** (JSON array format as shown above)
+                    """, originalKeyword, keywords))
         );
     }
 
