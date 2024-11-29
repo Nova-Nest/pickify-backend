@@ -15,6 +15,6 @@ public class ImgCategoryController {
 
     @PostMapping("/api/img-category")
     public String matchKeywordForCategory(@RequestBody CategoryRequestDto requestDto) {
-        return imgCategoryService.getAIResult(requestDto);
+        return imgCategoryService.getAIResult(requestDto.getKeywords());
     }
 }
