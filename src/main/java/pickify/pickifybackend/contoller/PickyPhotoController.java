@@ -7,16 +7,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pickify.pickifybackend.dto.PickyPhotoRequest;
 import pickify.pickifybackend.dto.PickyPhotoResponse;
-import pickify.pickifybackend.service.PickyPhotoService;
+import pickify.pickifybackend.dto.SearchResultResponse;
+import pickify.pickifybackend.service.PickyLLMService;
 
 @RequiredArgsConstructor
 @RestController
 public class PickyPhotoController {
-    private final PickyPhotoService pickyPhotoService;
+    private final PickyLLMService pickyLLMService;
 
     @PostMapping("/picky/extract")
     public ResponseEntity<PickyPhotoResponse> getAIResult(@RequestBody PickyPhotoRequest pickyPhotoRequest) {
-        PickyPhotoResponse result = pickyPhotoService.getAIResult(pickyPhotoRequest);
+        PickyPhotoResponse result = pickyLLMService.getAIResult(pickyPhotoRequest);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/picky/search")
+    public ResponseEntity<SearchResultResponse> getSearchResult(String keywords) {
+        SearchResultResponse result = pickyLLMService.getImageSearchResult(keywords);
         return ResponseEntity.ok(result);
     }
 }
