@@ -10,14 +10,16 @@ import pickify.pickifybackend.dto.PickyPhotoResponse;
 import pickify.pickifybackend.dto.SearchResultResponse;
 import pickify.pickifybackend.service.PickyLLMService;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 public class PickyPhotoController {
     private final PickyLLMService pickyLLMService;
 
     @PostMapping("/picky/extract")
-    public ResponseEntity<PickyPhotoResponse> getAIResult(@RequestBody PickyPhotoRequest pickyPhotoRequest) {
-        PickyPhotoResponse result = pickyLLMService.getAIResult(pickyPhotoRequest);
+    public ResponseEntity<List<SearchResultResponse>> getAIResult(@RequestBody PickyPhotoRequest pickyPhotoRequest) {
+        List<SearchResultResponse> result = pickyLLMService.getAIResultV2(pickyPhotoRequest);
         return ResponseEntity.ok(result);
     }
 

@@ -1,11 +1,8 @@
 package pickify.pickifybackend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.ImageContent;
-import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.output.Response;
@@ -14,10 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import pickify.pickifybackend.dto.*;
 
-import java.net.URI;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,6 +34,21 @@ public class PickyLLMService {
         return null;
     }
 
+    public List<SearchResultResponse> getAIResultV2(PickyPhotoRequest pickyPhotoRequest) {
+        ChatLanguageModel model = VertexAiGeminiChatModel.builder()
+                .project(PROJECT_ID)
+                .location(LOCATION)
+                .modelName(MODEL_NAME)
+                .build();
+
+        UserMessage searchCandidates = PromptManager.extractSearchCandidates(pickyPhotoRequest.name(), pickyPhotoRequest.keywords());
+        Response<AiMessage> result = model.generate(searchCandidates);
+
+        System.out.println(result.toString());
+
+        return null;
+    }
+
     public PickyPhotoResponse getAIResult(PickyPhotoRequest pickyPhotoRequest) {
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -47,8 +58,8 @@ public class PickyLLMService {
                 .modelName(MODEL_NAME)
                 .build();
 
-        UserMessage keywordMessage = PromptManager.extractKeywordFromPhoto(pickyPhotoRequest.photoUrl(), pickyPhotoRequest.langType());
-        UserMessage onlyKeyword = PromptManager.extractKeywordFromPhoto(pickyPhotoRequest.photoUrl(), pickyPhotoRequest.langType());
+        UserMessage keywordMessage = PromptManager.extractKeywordFromPhoto(pickyPhotoRequest.imageUrl(), pickyPhotoRequest.langType());
+        UserMessage onlyKeyword = PromptManager.extractKeywordFromPhoto(pickyPhotoRequest.imageUrl(), pickyPhotoRequest.langType());
 
         Response<AiMessage> oldResult = model.generate(keywordMessage);
         Response<AiMessage> keywordResponse = model.generate(onlyKeyword);
@@ -57,7 +68,7 @@ public class PickyLLMService {
         PickyPhotoKeywordResponse pickyPhotoKeywordResponse;
 
         TestResponse testResponse;
-        UserMessage result = PromptManager.extractAndGenerateQueries(pickyPhotoRequest.photoUrl(), pickyPhotoRequest.langType());
+        UserMessage result = PromptManager.extractAndGenerateQueries(pickyPhotoRequest.imageUrl(), pickyPhotoRequest.langType());
         Response<AiMessage> reulstResponse = model.generate(result);
 
         log.info("Received JSON: {}", reulstResponse.content().text());
@@ -75,7 +86,7 @@ public class PickyLLMService {
         }
 
         // 2. 추출된 키워드로 사진 URL 추출
-        UserMessage pictureUrl = PromptManager.extractImagesWithKeywords(pickyPhotoRequest.photoUrl(), pickyPhotoKeywordResponse.keywords());
+        UserMessage pictureUrl = PromptManager.extractImagesWithKeywords(pickyPhotoRequest.imageUrl(), pickyPhotoKeywordResponse.keywords());
         Response<AiMessage> pictureUrlResponse = model.generate(pictureUrl);
 
         testResponse.queries().forEach(pickyPhotoProcessor::searchImageBy);

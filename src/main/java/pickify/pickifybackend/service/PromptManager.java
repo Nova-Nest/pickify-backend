@@ -7,31 +7,39 @@ import dev.langchain4j.data.message.UserMessage;
 import java.util.List;
 
 public class PromptManager {
+    public static UserMessage extractSearchCandidates(String name, List<String> keywords) {
+        return UserMessage.from(
+                TextContent.from("""
+                        Generate meaningful search strings based on the given `name` and `keywords`. 
+                        These search strings should describe items, styles, or concepts closely related to the `name` and keywords in a natural and relevant way.
 
-//    public static UserMessage extractKeywordFromPhoto(String photoUrl, String langType) {
-//        return UserMessage.from(
-//                ImageContent.from(photoUrl),
-//                TextContent.from(String.format("""
-//                        You can extract some keywords with the pictures. Your response should be %s
-//                        Keyword should be related with it and never repeat itself.
-//                        such as input is a coat, keyword never be a coat.
-//                        Keyword should be winter coat, black coat, or whatever very related with it.
-//                        You also give maximum 10 keywords.
-//                        output should be Json format.
-//
-//                        for example if the image is macbook, your keywords should be
-//                        "macbook", "laptop", "windows laptop", "mouse", "keyboard", "apple" like that.
-//
-//                        format :
-//
-//                        {
-//                            "langType" : input_language,
-//                            "keywords" : [keyword_list],
-//                        }
-//                        """, langType)
-//                )
-//        );
-//    }
+                        **Rules:**
+                        1. Results must not be simple keyword combinations. Instead, they should reflect meaningful phrases or ideas that combine the `name` with the essence of the keywords.
+                        2. Provide at least five results.
+                        3. Results should be relevant to the `name` and keywords and must follow a structured format.
+                        4. Output should be in a JSON-like list format.
+
+                        **Input Examples:**
+                        name: coffee
+                        keywords: [cafe, starbucks, tea, green tea, latte, bread, donut]
+
+                        **Output Example:**
+                        [
+                            "Starbucks latte pairing ideas",
+                            "Top cafes for green tea lovers",
+                            "How to bake bread for coffee mornings",
+                            "Donut and coffee recipe ideas",
+                            "Popular coffee shop vibes"
+                        ]
+
+                        **Input:**
+                        name: %s
+                        keywords: %s
+
+                        **Output:** (provide JSON-like list format as shown above)
+                        """.formatted(name, keywords))
+        );
+    }
 
     public static UserMessage extractKeywordFromPhoto(String photoUrl, String langType) {
         return UserMessage.from(
