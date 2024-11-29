@@ -1,8 +1,10 @@
 package pickify.pickifybackend.category;
 
+import org.springframework.core.io.ClassPathResource;
+
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -10,7 +12,10 @@ import java.util.Set;
 public class CategoryLoader {
 
     public static void loadCategories(String filePath, Map<String, Set<String>> categoryTree, Map<String, String> parentMap) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+
+        ClassPathResource resource = new ClassPathResource(filePath);
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] categories = line.split(" > ");

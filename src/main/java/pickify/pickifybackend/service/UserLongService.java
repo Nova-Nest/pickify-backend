@@ -2,7 +2,7 @@ package pickify.pickifybackend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pickify.pickifybackend.domain.UserLog;
+import pickify.pickifybackend.entity.UserLog;
 import pickify.pickifybackend.repository.UserLogRepository;
 
 @Service

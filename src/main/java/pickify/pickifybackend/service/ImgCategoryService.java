@@ -9,11 +9,12 @@ import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -32,7 +33,10 @@ public class ImgCategoryService {
 
     private final String MODEL_NAME = "gemini-1.5-flash-001";
 
-    private static final String CATEGORY_FILE_PATH = "src/main/resources/static/taxonomy.en-US.txt";
+
+    @Value("${category.file.path}")
+    private String CATEGORY_FILE_PATH;
+
     static List<String> categoryList = new ArrayList<>(); //파일에서 읽은 카테고리들을 저장
 
     public String getAIResult(List<String> keywords) {
@@ -67,7 +71,10 @@ public class ImgCategoryService {
 
     // 서버가 시작될 때 파일을 읽어 메모리에 저장하는 메서드
     private void loadCategoriesFromFile(String filePath) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+
+        ClassPathResource resource = new ClassPathResource(filePath);
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 // Split the line by ">"
