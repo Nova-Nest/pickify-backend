@@ -37,7 +37,7 @@ public class PickyLLMService {
         return null;
     }
 
-    public List<SearchResultResponse> getAIResult(PickyPhotoRequest pickyPhotoRequest) {
+    public PickyPhotoResponse getAIResult(PickyPhotoRequest pickyPhotoRequest) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         ChatLanguageModel model = VertexAiGeminiChatModel.builder()
@@ -62,6 +62,7 @@ public class PickyLLMService {
             throw new RuntimeException(e);
         }
 
-        return pickyPhotoProcessor.searchImageBy(results);
+        // TODO 실제 ObjectId로 넣어야함
+        return new PickyPhotoResponse("ObjID", pickyPhotoProcessor.searchImageBy(results));
     }
 }
