@@ -87,7 +87,7 @@ public class PickyLLMService {
         String resultCategory = userLog.getCategory();
         String userUuid = userLog.getUserUuid();
 
-        List<UserLog> relatedCategoryLogs = userLogRepository.findAllByCategoryAndUserUuid(resultCategory, userUuid);
+        List<UserLog> relatedCategoryLogs = userLogRepository.findAllByCategoryAndUserUuidOrderByCreatedAtDesc(resultCategory, userUuid);
         List<PickyRelatedProductResponse.Data> data = relatedCategoryLogs.stream()
                 .map(log -> new PickyRelatedProductResponse.Data(log.getOriginalImageUrl(), log.getMainKeyword(), log.getBuiltInAiKeywords()))
                 .toList();
