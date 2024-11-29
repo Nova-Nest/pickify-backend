@@ -3,6 +3,10 @@ plugins {
     id 'org.springframework.boot' version '3.3.5'
     id 'io.spring.dependency-management' version '1.1.6'
 }
+ext {
+    set('springCloudGcpVersion', "5.0.0")
+    set('springCloudVersion', "2023.0.0")
+}
 
 group = 'pickify'
 version = '0.0.1-SNAPSHOT'
@@ -42,10 +46,19 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
     // gcp cloud storage
-    implementation group: 'org.springframework.cloud', name: 'spring-cloud-gcp-starter', version: '1.2.5.RELEASE'
-    implementation group: 'org.springframework.cloud', name: 'spring-cloud-gcp-storage', version: '1.2.5.RELEASE'
+    //GCP
+    implementation 'com.google.cloud:spring-cloud-gcp-starter-storage'
+//    출처: https://cn-c.tistory.com/73?category=1147045 [Codename Cathy:티스토리]
 
 }
+
+dependencyManagement {
+    imports {
+        mavenBom "com.google.cloud:spring-cloud-gcp-dependencies:${springCloudGcpVersion}"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
 
 tasks.named('test') {
     useJUnitPlatform()
