@@ -3,6 +3,20 @@ Content-Type: application/json
 
 {
   "keywords": [
+    "bag",
+    "leather",
+    "tote",
+    "shoulder",
+    "handbag"
+  ]
+}
+
+###
+POST http://localhost:8080/api/img-category
+Content-Type: application/json
+
+{
+  "keywords": [
       "macbook air",
       "apple",
       "laptop",
@@ -11,3 +25,5 @@ Content-Type: application/json
       "keyboard"
   ]
 }
+
+

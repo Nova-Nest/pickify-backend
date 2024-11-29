@@ -1,6 +1,7 @@
 package pickify.pickifybackend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -18,6 +19,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -51,22 +54,19 @@ public class ImgCategoryService {
 
         Response<AiMessage> resultResponse = model.generate(category);
 
-//        // ChatMessage로 변환하여 generate 메서드에 전달
-//        UserMessage category = PromptManager.extractCategoryFromKeywords(requestDto.getKeywords(), categoryList);
-//        ChatMessage chatMessage = new ChatMessage(category); // UserMessage를 ChatMessage로 변환
-//        Response<AiMessage> resultResponse = model.generate(chatMessage);
-
         log.info("Received JSON: {}", resultResponse.content().text());
 
-        try {
-            return objectMapper.writeValueAsString(resultResponse.content().text());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return extractCategoryFromJson(resultResponse.content().text());
 
     }
-
+    public String extractCategoryFromJson(String jsonResponse) {
+        Pattern pattern = Pattern.compile("\"category\"\\s*:\\s*\"([^\"]+)\"");
+        Matcher matcher = pattern.matcher(jsonResponse);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
 
     // 서버가 시작될 때 파일을 읽어 메모리에 저장하는 메서드
     public void loadCategoriesFromFile(String filePath) {
