@@ -24,6 +24,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,13 +60,24 @@ public class PickyLLMService {
                 .modelName(MODEL_NAME)
                 .build();
 
-        String category = extractCategory(pickyPhotoRequest.keywords(), model);
-        List<String> results = extractDataResult(pickyPhotoRequest, model);
+        CompletableFuture<String> categoryFuture =
+                CompletableFuture.supplyAsync(() -> extractCategory(pickyPhotoRequest.keywords(), model));
+        CompletableFuture<List<String>> resultsFuture =
+                CompletableFuture.supplyAsync(() -> extractDataResult(pickyPhotoRequest, model));
 
-        List<SearchResultResponse> searchResultResponseList = pickyPhotoProcessor.searchImageBy(results);
+        CompletableFuture.allOf(categoryFuture, resultsFuture).join();
 
-        UserLog savedUserlog = getUserLog(pickyPhotoRequest, category, results, searchResultResponseList);
-        return new PickyPhotoResponse(savedUserlog.getId(), searchResultResponseList);
+        try {
+            String category = categoryFuture.get();
+            List<String> results = resultsFuture.get();
+
+            List<SearchResultResponse> searchResultResponseList = pickyPhotoProcessor.searchImageBy(results);
+
+            UserLog savedUserlog = getUserLog(pickyPhotoRequest, category, results, searchResultResponseList);
+            return new PickyPhotoResponse(savedUserlog.getId(), searchResultResponseList);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private List<String> extractDataResult(PickyPhotoRequest pickyPhotoRequest, ChatLanguageModel model) {
