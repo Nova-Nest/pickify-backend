@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import pickify.pickifybackend.category.controller.CategoryRequestDto;
+import pickify.pickifybackend.dto.CategoryRequestDto;
 import pickify.pickifybackend.service.ImgCategoryService;
 
 @RestController

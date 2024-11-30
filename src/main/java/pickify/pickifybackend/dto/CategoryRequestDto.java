@@ -1,4 +1,4 @@
-package pickify.pickifybackend.category.controller;
+package pickify.pickifybackend.dto;
 
 import lombok.Getter;
 
