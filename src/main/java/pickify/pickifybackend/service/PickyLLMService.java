@@ -58,24 +58,13 @@ public class PickyLLMService {
                 .modelName(MODEL_NAME)
                 .build();
 
-        CompletableFuture<String> categoryFuture =
-                CompletableFuture.supplyAsync(() -> extractCategory(pickyPhotoRequest.keywords(), model));
-        CompletableFuture<List<String>> resultsFuture =
-                CompletableFuture.supplyAsync(() -> extractDataResult(pickyPhotoRequest, model));
-
-        CompletableFuture.allOf(categoryFuture, resultsFuture).join();
-
-        try {
-            String category = categoryFuture.get();
-            List<String> results = resultsFuture.get();
+            String category = extractCategory(pickyPhotoRequest.keywords(), model);
+            List<String> results = extractDataResult(pickyPhotoRequest, model);
 
             List<SearchResultResponse> searchResultResponseList = pickyPhotoProcessor.searchImageBy(results);
 
             UserLog savedUserlog = getUserLog(pickyPhotoRequest, category, results, searchResultResponseList);
             return new PickyPhotoResponse(savedUserlog.getId(), searchResultResponseList);
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public PickyRelatedProductResponse getRelatedProduct(String id) {

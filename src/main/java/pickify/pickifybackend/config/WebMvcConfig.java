@@ -29,7 +29,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "http://localhost:3000",
                         "chrome-extension://joefpbhghckcofhmbofcopcclpgndaif",
                         "chrome-extension://adbeiiapbemgdpeobhmdhaemefpnafme",
-                        "chrome-extension://lnfglnoigklliplnmljoaolgepocmomn"
+                        "chrome-extension://lnfglnoigklliplnmljoaolgepocmomn",
+                        "chrome-extension://ejajjefkhngndnmedbeidelfmciigldc"
                 )
                 // GET, POST, PATCH, DELETE, OPTIONS 메서드 허용
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
