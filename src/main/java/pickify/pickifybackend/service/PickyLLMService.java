@@ -99,6 +99,7 @@ public class PickyLLMService {
 
         List<PickyRelatedProductResponse.Data> data = uniqueLogs.stream()
                 .map(log -> new PickyRelatedProductResponse.Data(log.getOriginalImageUrl(), log.getMainKeyword(), log.getBuiltInAiKeywords()))
+                .limit(4)
                 .toList();
 
         return new PickyRelatedProductResponse(userLog.getCategory(), data);
