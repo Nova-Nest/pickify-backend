@@ -30,7 +30,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "chrome-extension://joefpbhghckcofhmbofcopcclpgndaif",
                         "chrome-extension://adbeiiapbemgdpeobhmdhaemefpnafme",
                         "chrome-extension://lnfglnoigklliplnmljoaolgepocmomn",
-                        "chrome-extension://ejajjefkhngndnmedbeidelfmciigldc"
+                        "chrome-extension://ejajjefkhngndnmedbeidelfmciigldc",
+                        "chrome-extension://iohmklbhlmidbfmacicpgdlecmbgmnpg",
+                        "chrome-extension://ifbfagdhnodepmlnegjfhfpenmmmhbfg"
                 )
                 // GET, POST, PATCH, DELETE, OPTIONS 메서드 허용
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
